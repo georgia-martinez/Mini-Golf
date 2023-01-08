@@ -24,11 +24,23 @@ type Game struct{
 
 func NewGame() *Game {
 
-	var ball = Ball { x: 250, y: 250, radius: 10 }
+	// Load golf ball image
+	var err error
+	var ball_img *ebiten.Image
 
+	ball_img, _, err = ebitenutil.NewImageFromFile("graphics/golf_ball.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create ball struct
+	var ball = Ball { x: 250, y: 250, radius: 10, img: ball_img }
+
+	// Set background
 	var backgroundImage = ebiten.NewImage(screenWidth, screenHeight)
 	backgroundImage.Fill(color.Black)
 
+	// Create the game struct
 	g := &Game { 
 		backgroundImage: backgroundImage, 
 		ball: ball,
@@ -59,7 +71,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.DrawImage(g.backgroundImage, nil)
 
 	// Draw golf ball
-	ebitenutil.DrawCircle(screen, g.ball.x, g.ball.y, g.ball.radius, color.White)
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(100, 100)
+	screen.DrawImage(g.ball.img, op)
+
+	// Draw golf ball
+	// ebitenutil.DrawCircle(screen, g.ball.x, g.ball.y, g.ball.radius, color.White)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
