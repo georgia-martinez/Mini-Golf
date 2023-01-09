@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "fmt"
+	"fmt"
 	"image/color"
 	"log"
 
@@ -15,11 +15,11 @@ const (
 	screenHeight = 500
 )
 
-type Game struct{
+type Game struct {
 	backgroundImage *ebiten.Image
-	ball Ball
-	mouseDown bool
-	mouseEvent MouseEvent
+	ball            Ball
+	mouseDown       bool
+	mouseEvent      MouseEvent
 }
 
 func NewGame() *Game {
@@ -34,61 +34,57 @@ func NewGame() *Game {
 	}
 
 	// Create ball struct
-	var ball = Ball { 
-		x: 250, 
-		y: 250, 
-		radius: 10, 
-		img: ball_img, 
-		isMoving: false,
+	var ball = Ball{
+		radius: 10,
+		img:    ball_img,
 	}
+	ball.SetPosition(screenWidth/2, screenHeight/2)
 
 	// Set background
 	var backgroundImage = ebiten.NewImage(screenWidth, screenHeight)
 	backgroundImage.Fill(color.Black)
 
 	// Create the game struct
-	g := &Game { 
-		backgroundImage: backgroundImage, 
-		ball: ball,
-		mouseDown: false,
-		mouseEvent: MouseEvent{},
+	g := &Game{
+		backgroundImage: backgroundImage,
+		ball:            ball,
+		mouseEvent:      MouseEvent{},
 	}
 
 	return g
 }
 
 func (g *Game) Update() error {
-	// Reset ball position for debugging
-	if(inpututil.IsKeyJustPressed(ebiten.KeyR)) {
-		g.ball.x = 250
-		g.ball. y = 250
-	}
 
-	if(inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft)) {
-		var x0, y0 = ebiten.CursorPosition()
-		
-		g.mouseEvent = MouseEvent {
-			 x0: float64(x0), 
-			 y0: float64(y0),
+	// Defining mouse controls for ball movement
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		var mouseX, mouseY = ebiten.CursorPosition()
+
+		g.mouseEvent = MouseEvent{
+			mouseX: float64(mouseX),
+			mouseY: float64(mouseY),
 		}
 
-	} else if (inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft)) {
+		g.ball.canStartMoving = g.ball.IsClicked(g.mouseEvent.mouseX, g.mouseEvent.mouseY) && !g.ball.isMoving
+	}
+
+	if g.ball.canStartMoving && inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 		var x1, y1 = ebiten.CursorPosition()
-		g.mouseEvent.SetPower(float64(x1), float64(y1))	
-		g.mouseEvent.SetAngle(float64(x1), float64(y1))	
+
+		g.mouseEvent.SetPower(float64(x1), float64(y1))
+		g.mouseEvent.SetAngle(float64(x1), float64(y1))
+
+		// Set the initial velocity
+		var angle = g.mouseEvent.angle
+		var power = g.mouseEvent.power
+
+		g.ball.SetInitialVelocity(angle, power)
 
 		g.ball.isMoving = true
 	}
 
-	if(g.ball.isMoving) {
-
-		if(g.ball.vx0 == 0 && g.ball.vy0 == 0) {
-			var angle = g.mouseEvent.angle
-			var power = g.mouseEvent.power
-
-			g.ball.SetInitialVelocity(angle, power)
-		}
-
+	// Update the ball's position
+	if g.ball.isMoving {
 		g.ball.MovePosition()
 	}
 
@@ -112,6 +108,8 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Mini Golf")
+
+	fmt.Print()
 
 	if err := ebiten.RunGame(NewGame()); err != nil {
 		log.Fatal(err)
