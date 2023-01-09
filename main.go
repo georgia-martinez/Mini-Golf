@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -42,7 +41,7 @@ func NewGame() *Game {
 
 	// Set background
 	var backgroundImage = ebiten.NewImage(screenWidth, screenHeight)
-	backgroundImage.Fill(color.Black)
+	backgroundImage.Fill(GetRGBColor(45, 150, 91))
 
 	// Create the game struct
 	g := &Game{
@@ -79,6 +78,7 @@ func (g *Game) Update() error {
 		var power = g.mouseEvent.power
 
 		g.ball.SetInitialVelocity(angle, power)
+		g.ball.SetInitialDirection()
 
 		g.ball.isMoving = true
 	}

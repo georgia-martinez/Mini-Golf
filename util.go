@@ -1,7 +1,9 @@
 package main
 
 import (
- 	"math"
+	"image/color"
+	"strconv"
+	"math"
 )
 
 func GetDistance(x0 float64, y0 float64, x1 float64, y1 float64) float64 {
@@ -14,4 +16,21 @@ func GetClosestNumber(a float64, b float64, c float64) float64 {
 	} else {
         return b
 	}
+}
+
+func GetRGBColor(R int64, G int64, B int64) color.RGBA {
+	
+	r := DecToHex(R)
+	g := DecToHex(G)
+	b := DecToHex(B)
+
+	return color.RGBA{r, g, b, 0xff}
+}
+
+func DecToHex(num int64) uint8 {
+
+	hexString := strconv.FormatInt(num, 16)
+	hexNum, _ := strconv.ParseInt(hexString, 16, 64)
+
+	return uint8(hexNum)
 }

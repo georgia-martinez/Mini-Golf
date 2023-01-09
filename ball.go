@@ -6,22 +6,18 @@ import (
 )
 
 type Ball struct {
+	img    *ebiten.Image
 	x      float64
 	y      float64
 	radius float64
-	img    *ebiten.Image
-
 	centerX float64
 	centerY float64
-
-	vx0 float64
-	vy0 float64
-
-	canStartMoving bool
-	isMoving       bool
-
+	velX float64
+	velY float64
 	dirX float64
 	dirY float64
+	canStartMoving bool
+	isMoving       bool
 }
 
 func (ball *Ball) SetPosition(x float64, y float64) {
@@ -35,16 +31,18 @@ func (ball *Ball) SetPosition(x float64, y float64) {
 }
 
 func (ball *Ball) SetInitialVelocity(angle float64, power float64) {
-	ball.vx0 = -math.Cos(angle) * power
-	ball.vy0 = math.Sin(angle) * power
+	ball.velX = -math.Cos(angle) * power
+	ball.velY = math.Sin(angle) * power
+}
 
+func (ball *Ball) SetInitialDirection() {
 	ball.dirX = 1
 	ball.dirY = 1
 }
 
 func (ball *Ball) ResetVelocity() {
-	ball.vx0 = 0
-	ball.vy0 = 0
+	ball.velX = 0
+	ball.velY = 0
 
 	ball.isMoving = false
 }
@@ -54,8 +52,8 @@ func (ball *Ball) MovePosition() {
 	// Changing the ball's velocity
 	const DRAG = .9
 
-	ball.vx0 *= ball.dirX * DRAG
-	ball.vy0 *= ball.dirY * DRAG
+	ball.velX *= ball.dirX * DRAG
+	ball.velY *= ball.dirY * DRAG
 
 	// Make ball bounce if it hits a wall
 	width, height := ball.img.Size()
@@ -74,10 +72,10 @@ func (ball *Ball) MovePosition() {
 	}
 
 	// Changing the ball's position
-	ball.SetPosition(ball.x+ball.vx0, ball.y+ball.vy0)
+	ball.SetPosition(ball.x+ball.velX, ball.y+ball.velY)
 
 	// Reset the velocity is the ball is done moving
-	if math.Round(ball.vx0) == 0 && math.Round(ball.vy0) == 0 {
+	if math.Round(ball.velX) == 0 && math.Round(ball.velY) == 0 {
 		ball.ResetVelocity()
 	}
 }
