@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"image/color"
 	"log"
-	// "math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -61,23 +60,22 @@ func NewGame() *Game {
 func (g *Game) Update() error {
 	// Reset ball position for debugging
 	if(inpututil.IsKeyJustPressed(ebiten.KeyR)) {
-		fmt.Println("Reset")
 		g.ball.x = 250
 		g.ball. y = 250
 	}
 
 	if(inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft)) {
-		fmt.Println("Mouse Just Pressed")
-
 		var x0, y0 = ebiten.CursorPosition()
-		g.mouseEvent = MouseEvent { x0: float64(x0), y0: float64(y0) }
+		
+		g.mouseEvent = MouseEvent {
+			 x0: float64(x0), 
+			 y0: float64(y0),
+		}
 
 	} else if (inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft)) {
 		var x1, y1 = ebiten.CursorPosition()
 		g.mouseEvent.SetPower(float64(x1), float64(y1))	
 		g.mouseEvent.SetAngle(float64(x1), float64(y1))	
-
-		fmt.Println(g.mouseEvent.angle)
 
 		g.ball.isMoving = true
 	}
@@ -90,8 +88,6 @@ func (g *Game) Update() error {
 
 			g.ball.SetInitialVelocity(angle, power)
 		}
-
-		// fmt.Println("vx: ", velx, " vy: ", vely)
 
 		g.ball.MovePosition()
 	}
