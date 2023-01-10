@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	// "fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -10,34 +11,60 @@ type Ball struct {
 	x      float64
 	y      float64
 	radius float64
+
+	top    float64
+	bottom float64
+	left   float64
+	right  float64
+
+	width  float64
+	height float64
+
 	centerX float64
 	centerY float64
+
 	velX float64
 	velY float64
-	dirX float64
-	dirY float64
+
 	canStartMoving bool
 	isMoving       bool
+
+	gameObjects []GameObject // to check collisions with
+}
+
+func NewBall(img *ebiten.Image, x float64, y float64) Ball {
+	width, height := img.Size()
+
+	ball := Ball{
+		img:    img,
+		x:      x,
+		y:      y,
+		radius: float64(width) / 2,
+		width:  float64(width),
+		height: float64(height),
+	}
+
+	ball.SetPosition(x, y)
+
+	return ball
 }
 
 func (ball *Ball) SetPosition(x float64, y float64) {
 	ball.x = x
 	ball.y = y
 
-	width, height := ball.img.Size()
+	ball.centerX = ball.x + (ball.width / 2)
+	ball.centerY = ball.y + (ball.height / 2)
 
-	ball.centerX = ball.x + (float64(width) / 2)
-	ball.centerY = ball.y + (float64(height) / 2)
+	ball.top = ball.y
+	ball.bottom = ball.y + ball.height
+	ball.left = ball.x
+	ball.right = ball.x + ball.width
 }
 
 func (ball *Ball) SetInitialVelocity(angle float64, power float64) {
 	ball.velX = -math.Cos(angle) * power
 	ball.velY = math.Sin(angle) * power
-}
-
-func (ball *Ball) SetInitialDirection() {
-	ball.dirX = 1
-	ball.dirY = 1
 }
 
 func (ball *Ball) ResetVelocity() {
@@ -50,25 +77,16 @@ func (ball *Ball) ResetVelocity() {
 func (ball *Ball) MovePosition() {
 
 	// Changing the ball's velocity
-	const DRAG = .9
+	const DRAG = .95
 
-	ball.velX *= ball.dirX * DRAG
-	ball.velY *= ball.dirY * DRAG
+	ball.velX *= DRAG
+	ball.velY *= DRAG
 
 	// Make ball bounce if it hits a wall
-	width, height := ball.img.Size()
-	
-	w := float64(width) / 2
-	h := float64(height) / 2
+	ball.CheckForScreenCollision()
 
-	if ball.centerX - w < 0 || ball.centerX + w > screenWidth {
-		ball.dirX *= -1
-		ball.x = GetClosestNumber(0, float64(screenWidth - width), ball.centerX)
-	}
-
-	if ball.centerY - h < 0 || ball.centerY + h > screenHeight {
-		ball.dirY *= -1
-		ball.y = GetClosestNumber(0, float64(screenHeight - height), ball.centerY)
+	for _, object := range ball.gameObjects {
+		ball.CheckForCollision(object)
 	}
 
 	// Changing the ball's position
@@ -78,6 +96,63 @@ func (ball *Ball) MovePosition() {
 	if math.Round(ball.velX) == 0 && math.Round(ball.velY) == 0 {
 		ball.ResetVelocity()
 	}
+}
+
+func (ball *Ball) CheckForScreenCollision() {
+	w := ball.width / 2
+	h := ball.height / 2
+
+	if ball.centerX-w < 0 || ball.centerX+w > screenWidth {
+		ball.velX *= -1
+		ball.x = GetClosestNumber(0, float64(screenWidth-ball.width), ball.centerX)
+	}
+
+	if ball.centerY-h < 0 || ball.centerY+h > screenHeight {
+		ball.velY *= -1
+		ball.y = GetClosestNumber(0, float64(screenHeight-ball.height), ball.centerY)
+	}
+}
+
+func (ball *Ball) CheckForCollision(o GameObject) {
+
+	if !ball.IsTouching(o) {
+		return
+	}
+
+	var tolerance float64 = 30
+
+	// Collision with top side of wall
+	if math.Abs(o.Top() - ball.bottom) < tolerance {
+		ball.velY *= -1
+	}
+
+	// Collision with bottom side of wall
+	if math.Abs(o.Bottom() - ball.top) < tolerance {
+		ball.velY *= -1
+	}
+
+	// Collision with left side of wall
+	if math.Abs(o.Left() - ball.right) < tolerance {
+		ball.velX *= -1
+	}
+
+	// Collision with right side of wall
+	if math.Abs(o.Right() - ball.left) < tolerance {
+		ball.velX *= -1
+	}
+}
+
+func (ball *Ball) IsTouching(o GameObject) bool {
+
+	if ball.right < o.Left() || ball.left > o.Right() {
+		return false
+	}
+
+	if ball.bottom < o.Top() || ball.top > o.Bottom() {
+		return false
+	}
+
+	return true
 }
 
 func (ball *Ball) IsClicked(mouseX float64, mouseY float64) bool {

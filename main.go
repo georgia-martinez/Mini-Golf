@@ -38,11 +38,8 @@ func NewGame() *Game {
 	}
 
 	// Create ball struct
-	var ball = Ball{
-		radius: 10,
-		img:    ball_img,
-	}
-	ball.SetPosition(screenWidth/2, screenHeight/2)
+	ball := NewBall(ball_img, screenWidth/2, screenHeight/2)
+	ball.gameObjects = gameManager.GetGameObjects(1)
 
 	// Create the game struct
 	g := &Game{
@@ -80,7 +77,6 @@ func (g *Game) Update() error {
 		var power = g.mouseEvent.power
 
 		g.ball.SetInitialVelocity(angle, power)
-		g.ball.SetInitialDirection()
 
 		g.ball.isMoving = true
 	}

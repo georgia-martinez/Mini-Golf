@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "fmt"
     "math"
 )
 
@@ -13,7 +12,14 @@ type MouseEvent struct {
 }
 
 func (m *MouseEvent) SetPower(x1 float64, y1 float64) {
-	m.power = GetDistance(m.mouseX, m.mouseY, x1, y1) / 6
+
+	power := GetDistance(m.mouseX, m.mouseY, x1, y1) / 10
+
+	if power > 25 {
+		power = 25
+	}
+
+	m.power = power
 }
 
 func (m *MouseEvent) SetAngle(x1 float64, y1 float64) {

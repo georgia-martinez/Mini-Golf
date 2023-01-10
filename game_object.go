@@ -6,5 +6,9 @@ import (
 
 type GameObject interface {
 	Draw(screen *ebiten.Image)
-	GetTag() string
+	Tag() string
+	Top() float64
+	Bottom() float64
+	Left() float64
+	Right() float64
 }
