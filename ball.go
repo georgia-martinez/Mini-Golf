@@ -2,7 +2,7 @@ package main
 
 import (
 	"math"
-	// "fmt"
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -119,27 +119,28 @@ func (ball *Ball) CheckForCollision(o GameObject) {
 		return
 	}
 
-	var tolerance float64 = 30
+	var tolerance float64 = 25
 
-	// Collision with top side of wall
-	if math.Abs(o.Top() - ball.bottom) < tolerance {
+	fmt.Println("BEFORE: velX: ", ball.velX, " velY: ", ball.velY)
+
+	const BUFF = 1
+
+	if math.Abs(o.Top() - ball.bottom) < tolerance { // Collision with top side of wall
 		ball.velY *= -1
-	}
-
-	// Collision with bottom side of wall
-	if math.Abs(o.Bottom() - ball.top) < tolerance {
+		ball.y = o.Top() - ball.height - BUFF 
+	} else if math.Abs(o.Bottom() - ball.top) < tolerance { // Collision with bottom side of wall
 		ball.velY *= -1
+		ball.y = o.Bottom() + BUFF
+	} else if math.Abs(o.Left() - ball.right) < tolerance { // Collision with left side of wall
+		ball.velX *= -1
+		ball.x = o.Left() - ball.width - BUFF 
+	} else if math.Abs(o.Right() - ball.left) < tolerance { // Collision with right side of wall
+		ball.velX *= -1
+		ball.x = o.Right() + BUFF
+		return
 	}
 
-	// Collision with left side of wall
-	if math.Abs(o.Left() - ball.right) < tolerance {
-		ball.velX *= -1
-	}
-
-	// Collision with right side of wall
-	if math.Abs(o.Right() - ball.left) < tolerance {
-		ball.velX *= -1
-	}
+	fmt.Println("AFTER: velX: ", ball.velX, " velY: ", ball.velY)
 }
 
 func (ball *Ball) IsTouching(o GameObject) bool {
