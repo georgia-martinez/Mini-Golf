@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -15,13 +14,19 @@ const (
 )
 
 type Game struct {
+	gameManager GameManager
 	backgroundImage *ebiten.Image
 	ball            Ball
-	mouseDown       bool
 	mouseEvent      MouseEvent
 }
 
 func NewGame() *Game {
+
+	gameManager := GameManager{ level: 1 }
+
+	// Set background
+	var backgroundImage = ebiten.NewImage(screenWidth, screenHeight)
+	backgroundImage.Fill(GetRGBColor(45, 150, 91))
 
 	// Load golf ball image
 	var err error
@@ -39,12 +44,9 @@ func NewGame() *Game {
 	}
 	ball.SetPosition(screenWidth/2, screenHeight/2)
 
-	// Set background
-	var backgroundImage = ebiten.NewImage(screenWidth, screenHeight)
-	backgroundImage.Fill(GetRGBColor(45, 150, 91))
-
 	// Create the game struct
 	g := &Game{
+		gameManager: gameManager,
 		backgroundImage: backgroundImage,
 		ball:            ball,
 		mouseEvent:      MouseEvent{},
@@ -94,6 +96,11 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	// Draw background
 	screen.DrawImage(g.backgroundImage, nil)
+
+	// Draw the walls
+	for _, object := range g.gameManager.GetGameObjects(g.gameManager.level) {
+		object.Draw(screen)
+	}
 
 	// Draw golf ball
 	op := &ebiten.DrawImageOptions{}

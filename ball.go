@@ -74,7 +74,7 @@ func (ball *Ball) MovePosition() {
 	// Changing the ball's position
 	ball.SetPosition(ball.x+ball.velX, ball.y+ball.velY)
 
-	// Reset the velocity is the ball is done moving
+	// Check if ball is done moving
 	if math.Round(ball.velX) == 0 && math.Round(ball.velY) == 0 {
 		ball.ResetVelocity()
 	}
